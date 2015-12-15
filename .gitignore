@@ -1,0 +1,17 @@
+.Xauthority
+.bash_history
+.bash_profile
+.*~
+.bashrc
+_viminfo
+*~
+.config/
+.dbus/
+.lesshst
+.minttyrc
+.profile
+.serverauth.*
+.ssh/
+.startxwinrc
+.xsession-errors
+bin/strterm
