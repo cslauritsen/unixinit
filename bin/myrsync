@@ -1,0 +1,73 @@
+#!/bin/bash
+
+logfile=/tmp/myrsync.log
+
+ts() {
+	 date '+%Y-%m-%d %H:%M:%S'
+}
+
+log() {
+	if [ "$#" -gt 0 ] 
+	then
+		echo $(ts) "$@" | tee -a $logfile
+	else
+		cat | while read ln
+		do
+			echo $(ts) $ln | tee -a $logfile
+		done
+		ts | tee -a $logfile
+		cat | tee -a $logfile
+	fi
+}
+
+sz=$(stat -c '%s' $logfile)
+if [ "$sz" -gt $((1024*1024*2)) ]
+then
+	t=$(date '+%Y-%m-%d_%H-%M-%S')
+	mv $logfile ${logfile}.${t}
+	gzip ${logfile}.${t}
+	# clean up old logs
+	echo cleaning up old logs
+	find $(dirname $logfile) -type f -name '*.gz' -mtime +14 | grep $(basename $logfile .log) | xargs rm -f
+fi
+
+log ===============================
+log Starting myrsync
+
+cd /cygdrive/c/Users/csl04r/
+
+if ssh -o 'ConnectTimeout 2' briggsy echo briggsy lives | log
+then
+	log rsync to briggsy
+	dt=$(date "+%Y/%m/%d")
+	tm=$(date "+%H_%M_%S")
+	tgt=incomplete_back-$(uuidgen)
+	if rsync -aP \
+		--delete-excluded \
+		--exclude-from=/home/csl04r/.rsync/exclude \
+		--link-dest=../current/\
+		--rsync-path="mkdir -p TimeMachine/$dt && rsync" \
+		Documents csl04r@briggsy:TimeMachine/$tgt \
+	       && ssh csl04r@briggsy \
+       	       "mv TimeMachine/$tgt TimeMachine/$dt/$tm \
+	       && rm -f TimeMachine/current \
+	       && ln -s $dt/$tm TimeMachine/current" 2>&1 | tee -a $logfile
+	then
+		log rsync completed successfully
+	else
+		log rsync exited with return code $?
+	fi
+elif ssh -o 'ConnectTimeout 2' kitchen echo kitchen is alive  | log
+then
+	log rsync to kitchen
+	if rsync -aP Documents kitchen:/cygdrive/c/Users/kitchen/Documents/Chad/ 2>&1 | tee -a $logfile
+	then
+		log rsync completed successfully
+	else
+		log rsync exited with return code $?
+	fi
+else
+	log Could not connect to any rsync hosts
+fi
+
+sleep 5

@@ -1,0 +1,38 @@
+set bell-style none
+"\e[3~": delete-char
+# this is actually equivalent to "\C-?": delete-char
+
+# VT
+"\e[1~": beginning-of-line
+"\e[4~": end-of-line
+
+# kvt
+"\e[H":beginning-of-line
+"\e[F":end-of-line
+
+# rxvt and konsole (i.e. the KDE-app...)
+"\e[7~":beginning-of-line
+"\e[8~":end-of-line
+
+################## begin
+# csl, 13 Oct 2006, from http://infrablue.tripod.com/cygwin.html
+#if you don't like the annoying end-of-line beeps:
+set bell-style none
+# csl 3 Dec 2008, from http://www.cyberciti.biz/faq/bash-shell-setup-filename-tab-completion-case-insensitive/
+set completion-ignore-case on
+
+# from http://www.commandlinefu.com/commands/view/2608/ignore-hidden-directory-in-bash-completion-e.g.-.svn
+set match-hidden-files off
+
+# to show all characters like ...
+set meta-flag On
+set input-meta On
+set output-meta On
+set convert-meta Off
+
+"\C-v": paste-from-clipboard
+
+set editing-mode vi
+set blink-matching-paren on
+
+################## end
